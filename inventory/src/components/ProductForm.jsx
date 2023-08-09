@@ -10,6 +10,9 @@ const ProductForm = () => {
     const [buyingDate, setBuyingDate] = useState('');
     const [sellingPrice, setSellingPrice] = useState('');
     const [colors, setColors] = useState([{ color: '', sizes: [{ size: '', quantity: '' }] }]);
+    // const [images, setImages] = useState([{ images: [{ image: '' }] }]);
+    const [links, setLinks] = useState([{ link: '' }]);
+
     const [categories, setCategories] = useState([]);
     const [suppliers, setSuppliers] = useState([]);
     const [colorList, setColorList] = useState([]);
@@ -50,18 +53,33 @@ const ProductForm = () => {
     updatedColors[colorIndex].sizes[sizeIndex][field] = e.target.value;
     setColors(updatedColors);
   };
+  // const handleImageChange = (imageIndex, field, e) => {
+  //   const updatedImages = [...images];
+  //   updatedImages[imageIndex][field] = e.target.value;
+  //   setImages(updatedImages);
+  // };
 
   const handleAddSize = (colorIndex) => {
     const updatedColors = [...colors];
     updatedColors[colorIndex].sizes.push({ size: '', quantity: '' });
     setColors(updatedColors);
   };
+  // const handleAddImage = (imagesIndex) => {
+  //   const updatedImages = [...images];
+  //   updatedImages[imagesIndex].push({ image: '' });
+  //   setImages(updatedImages);
+  // };
 
   const handleRemoveSize = (colorIndex, sizeIndex) => {
     const updatedColors = [...colors];
     updatedColors[colorIndex].sizes.splice(sizeIndex, 1);
     setColors(updatedColors);
   };
+  // const handleRemoveImage = (imageIndex) => {
+  //   const updatedImages = [...images];
+  //   updatedImages[imageIndex].splice(imageIndex, 1);
+  //   setImages(updatedImages);
+  // };
 
 //   const handleColorChange = (colorIndex, field, e) => {
 //     const updatedColors = [...colors];
@@ -75,6 +93,24 @@ const handleColorChange = (index, event) => {
     setColors(updatedColors);
   };
 
+
+  const handleAddLink = () => {
+    setLinks([...links, { link: '' }]);
+  };
+  
+  const handleRemoveLink = (linkIndex) => {
+    const updatedLinks = links.filter((_, index) => index !== linkIndex);
+    setLinks(updatedLinks);
+  };
+  
+  const handleLinkChange = (linkIndex, e) => {
+    const updatedLinks = [...links];
+    updatedLinks[linkIndex].link = e.target.value;
+    setLinks(updatedLinks);
+  };
+  
+
+
   const handleSubmit = async () => {
     const productData = {
       productName,
@@ -85,6 +121,7 @@ const handleColorChange = (index, event) => {
       buyingDate,
       sellingPrice,
       colors,
+      links,
     };
 console.log(productData);
     try {
@@ -178,6 +215,36 @@ console.log(productData);
           onChange={(e) => setSellingPrice(e.target.value)}
         />
       </div>
+
+
+      {links.map((link, linkIndex) => (
+  <div key={linkIndex}>
+    <label htmlFor={`link-${linkIndex}`}>Link:</label>
+    <input
+      type="text"
+      id={`link-${linkIndex}`}
+      value={link.link}
+      onChange={(e) => handleLinkChange(linkIndex, e)}
+      required
+    />
+    <button type="button" onClick={() => handleRemoveLink(linkIndex)}>
+      Remove Link
+    </button>
+  </div>
+))}
+<button type="button" onClick={handleAddLink}>
+  Add Link
+</button>
+
+
+
+
+
+
+
+
+
+
       {colors.map((color, colorIndex) => (
         <div key={colorIndex}>
           <label htmlFor={`color-${colorIndex}`}>Color:</label>
