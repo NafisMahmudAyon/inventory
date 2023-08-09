@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
+import { Link } from 'react-router-dom';
 
 const ProductList = () => {
   const [products, setProducts] = useState([]);
@@ -17,12 +18,19 @@ const ProductList = () => {
     fetchProducts();
   }, []);
 
+  // const handleEditProduct = (productId) => {
+  //   console.log(productId);
+  //   // Navigate to the update form route, passing the productId as a parameter
+  //   history.push(`/update-product/${productId}`);
+  // };
+  
+
   return (
     <div className="container mx-auto mt-8">
       <h1 className="text-2xl font-bold mb-4">Product List</h1>
-      {products.map((product) => (
+      {products.map((product, index) => (
         <div key={product.id} className="border rounded p-4 mb-4">
-          <h2 className="text-xl font-semibold">{product.productName}</h2>
+          <h2 className="text-xl font-semibold">{index+1}- {product.productName}</h2>
           <p className="mb-2">Product Code: {product.productCode}</p>
           <p className="mb-2">Product Category: {product.productCategory}</p>
           <p className="mb-2">Supplier: {product.supplierName}</p>
@@ -40,6 +48,19 @@ const ProductList = () => {
               ))}
             </div>
           ))}
+          {/* <Link to={`/products/${product.id}/edit`}>Edit</Link> */}
+          {/* <button
+    onClick={() => handleEditProduct(product.id)}
+    className="bg-blue-500 text-white px-4 py-2 rounded"
+  >
+    Edit
+  </button> */}
+  <Link
+    to={`/update-product/${product.id}`}
+    className="bg-blue-500 text-white px-4 py-2 rounded"
+  >
+    Edit
+  </Link>
         </div>
       ))}
     </div>

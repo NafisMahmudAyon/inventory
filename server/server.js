@@ -835,6 +835,101 @@ app.get("/api/products", async (req, res) => {
 
 //get product end
 
+//get single product
+app.get("/api/products/:productId", async (req, res) => {
+  const productId = req.params.productId;
+
+  try {
+    const productQuery = `
+  SELECT p.id AS productId, p.productName, p.productCode, p.productCategory,
+         s.id AS supplierId, p.buyingPrice, p.buyingDate, p.sellingPrice,
+         pv.id AS productVariationId, pv.color_id AS colorId, c.color,
+         sz.id AS sizeId, sz.size, qty.id AS quantityId, qty.quantity,
+         l.id AS linkId, l.link
+  FROM products p
+  INNER JOIN suppliers s ON p.supplier_id = s.id
+  INNER JOIN product_variations pv ON pv.product_id = p.id
+  INNER JOIN colors c ON c.id = pv.color_id
+  INNER JOIN sizes sz ON sz.id = pv.size_id
+  LEFT JOIN quantities qty ON qty.id = pv.quantity_id
+  LEFT JOIN links l ON l.product_id = p.id
+  WHERE p.id = ?
+`;
+
+
+    db.query(productQuery, [productId], (error, productResult) => {
+      console.log(productResult);
+      const productName = productResult.productName;
+      if (error) {
+        console.error("An error occurred:", error);
+        res.status(500).json({ error: "An error occurred" });
+      } else {
+        const productData = {
+          id: productId,
+          productName: productName,
+          productCode: productResult.productCode,
+          productCategory: productResult.productCategory,
+          supplier: productResult.supplierId,
+          buyingPrice: productResult.buyingPrice,
+          buyingDate: productResult.buyingDate,
+          sellingPrice: productResult.sellingPrice,
+          colors: [],
+          links: [],
+        };
+
+        // Organize color, size, quantity data
+        productResult.forEach((row) => {
+          const colorData = productData.colors.find(
+            (color) => color.id === row.colorId
+          );
+
+          if (!colorData) {
+            const newColor = {
+              id: row.colorId,
+              color: row.color,
+              sizes: [],
+            };
+            productData.colors.push(newColor);
+          }
+
+          if (colorData) {
+            const sizeData = {
+              id: row.sizeId,
+              size: row.size,
+              quantity: row.quantity,
+            };
+            colorData.sizes.push(sizeData);
+          }
+
+          // const sizeData = {
+          //   id: row.sizeId,
+          //   size: row.size,
+          //   quantity: row.quantity,
+          // };
+          // colorData.sizes.push(sizeData);
+
+          // Check if the link already exists in the productData links array
+          const linkExists = productData.links.some(
+            (link) => link.id === row.linkId
+          );
+          if (!linkExists && row.linkId && row.link) {
+            const newLink = {
+              id: row.linkId,
+              link: row.link,
+            };
+            productData.links.push(newLink);
+          }
+        });
+
+        res.status(200).json(productData);
+      }
+    });
+  } catch (error) {
+    console.error("An error occurred:", error);
+    res.status(500).json({ error: "An error occurred" });
+  }
+});
+
 // ... (rest of the server code)
 
 const PORT = process.env.PORT || 5000;
