@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useParams } from 'react-router-dom';
+// import { Redirect } from 'react-router-dom';
+
 
 // const UpdateProductForm = ({ productId }) => {
 const UpdateProductForm = () => {
@@ -14,6 +16,11 @@ const UpdateProductForm = () => {
   const [sellingPrice, setSellingPrice] = useState("");
   const [colors, setColors] = useState([]);
   const [links, setLinks] = useState([]);
+  const [updateSuccess, setUpdateSuccess] = useState(false);
+  
+  const [suppliers, setSuppliers] = useState([]);
+  const [categories, setCategories] = useState([]);
+
 
 //   console.log(productId);
 
@@ -24,6 +31,9 @@ const UpdateProductForm = () => {
         const response = await axios.get(
           `http://localhost:5000/api/products/${productId}`
         );
+        const supplierResponse = await axios.get('http://localhost:5000/api/suppliers');
+        const categoryResponse = await axios.get('http://localhost:5000/api/categories');
+
         const productData = response.data;
         console.log(productData);
         setProductName(productData.productName);
@@ -31,10 +41,14 @@ const UpdateProductForm = () => {
         setProductCategory(productData.productCategory);
         setSupplier(productData.supplier);
         setBuyingPrice(productData.buyingPrice);
-        setBuyingDate(productData.buyingDate);
+        const apiDate = new Date(productData.buyingDate);
+        const formattedDate = apiDate.toISOString().split('T')[0];
+        setBuyingDate(formattedDate);
         setSellingPrice(productData.sellingPrice);
         setColors(productData.colors);
         setLinks(productData.links);
+        setSuppliers(supplierResponse.data);
+        setCategories(categoryResponse.data);
       } catch (error) {
         console.error("Error fetching product details:", error);
       }
@@ -132,6 +146,7 @@ const UpdateProductForm = () => {
       );
       if (response.status === 200) {
         console.log("Product data updated successfully");
+        setUpdateSuccess(true);
       } else {
         console.error("Error updating product data");
       }
@@ -162,11 +177,33 @@ const UpdateProductForm = () => {
       </div>
       <div>
         <label>Product Category:</label>
-        {/* Render the product category select input with options */}
+        <select
+  value={productCategory}
+  onChange={(e) => setProductCategory(e.target.value)}
+  required
+>
+  <option value="">Select Category</option>
+  {categories.map((category) => (
+    <option key={category.id} value={category.id}>
+      {category.name}
+    </option>
+  ))}
+</select>
       </div>
       <div>
         <label>Supplier:</label>
-        {/* Render the supplier select input with options */}
+        <select
+  value={supplier}
+  onChange={(e) => setSupplier(e.target.value)}
+  required
+>
+  <option value="">Select Supplier</option>
+  {suppliers?.map((supplier) => (
+    <option key={supplier.id} value={supplier.id}>
+      {supplier.name}
+    </option>
+  ))}
+</select>
       </div>
       <div>
         <label>Buying Price:</label>
@@ -274,6 +311,7 @@ const UpdateProductForm = () => {
       <button type="button" onClick={handleUpdate}>
         Update Product
       </button>
+      {updateSuccess && <Redirect to="/" />}
     </div>
   );
 };

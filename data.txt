@@ -1,0 +1,162 @@
+const [orderNo, setOrderNo] = useState("");
+  const [invoiceNo, setInvoiceNo] = useState("");
+  const [date, setDate] = useState("");
+  const [customerName, setCustomerName] = useState("");
+  const [address, setAddress] = useState("");
+  const [mobileNumber, setMobileNumber] = useState("");
+  const [paymentMethod, setPaymentMethod] = useState("");
+  const [transactionId, setTransactionId] = useState("");
+  const [amount, setAmount] = useState("");
+  const [bkashMobileNumber, setBkashMobileNumber] = useState("");
+  const [courierProvider, setCourierProvider] = useState("");
+  const [courierDate, setCourierDate] = useState("");
+  const [courierStatus, setCourierStatus] = useState("");
+  const [courierTrackingNumber, setCourierTrackingNumber] = useState("");
+  const [selectedProducts, setSelectedProducts] = useState([]);
+
+
+
+
+<div>
+        {/* order details  */}
+        <div>
+          <label>Order Number:</label>
+          <input
+            type="text"
+            value={orderData.orderNo}
+            onChange={(e) => setOrderData({ ...orderData, orderNo: e.target.value })}
+          />
+        </div>
+        <div>
+          <label>Invoice Number:</label>
+          <input
+            type="text"
+            value={orderData.invoiceNo}
+            onChange={(e) => setOrderData({ ...orderData, invoiceNo: e.target.value })}
+          />
+        </div>
+        <div>
+          <label>Date:</label>
+          <input
+            type="date"
+            value={orderData.date}
+            onChange={(e) => setOrderData({ ...orderData, date: e.target.value })}
+          />
+        </div>
+        <div>
+          <label>Customer Name:</label>
+          <input
+            type="text"
+            value={orderData.customerName}
+            onChange={(e) =>
+              setOrderData({ ...orderData, customerName: e.target.value })
+            }
+          />
+        </div>
+        <div>
+          <label>Address:</label>
+          <input
+            type="text"
+            value={orderData.address}
+            onChange={(e) => setOrderData({ ...orderData, address: e.target.value })}
+          />
+        </div>
+        <div>
+          <label>Mobile Number:</label>
+          <input
+            type="text"
+            value={orderData.mobileNumber}
+            onChange={(e) =>
+              setOrderData({ ...orderData, mobileNumber: e.target.value })
+            }
+          />
+        </div>
+        <div>
+          <label>Payment Method:</label>
+          <input
+            type="text"
+            value={orderData.paymentMethod}
+            onChange={(e) =>
+              setOrderData({ ...orderData, paymentMethod: e.target.value })
+            }
+          />
+        </div>
+        <div>
+          <label>Payment Status:</label>
+          <input
+            type="text"
+            value={orderData.paymentStatus}
+            onChange={(e) =>
+              setOrderData({ ...orderData, paymentStatus: e.target.value })
+            }
+          />
+        </div>
+        <div>
+          <label>Transaction Id:</label>
+          <input
+            type="text"
+            value={orderData.transactionId}
+            onChange={(e) =>
+              setOrderData({ ...orderData, transactionId: e.target.value })
+            }
+          />
+        </div>
+        <div>
+          <label>Amount:</label>
+          <input
+            type="number"
+            value={orderData.amount}
+            onChange={(e) => setOrderData({ ...orderData, amount: e.target.value })}
+          />
+        </div>
+        <div>
+          <label>Bkash Mobile Number:</label>
+          <input
+            type="text"
+            value={orderData.bkashMobileNumber}
+            onChange={(e) =>
+              setOrderData({ ...orderData, bkashMobileNumber: e.target.value })
+            }
+          />
+        </div>
+        <div>
+          <label>Courier Provider:</label>
+          <input
+            type="text"
+            value={orderData.courierProvider}
+            onChange={(e) =>
+              setOrderData({ ...orderData, courierProvider: e.target.value })
+            }
+          />
+        </div>
+        <div>
+          <label>Courier Date:</label>
+          <input
+            type="date"
+            value={orderData.courierDate}
+            onChange={(e) =>
+              setOrderData({ ...orderData, courierDate: e.target.value })
+            }
+          />
+        </div>
+        <div>
+          <label>Courier Status:</label>
+          <input
+            type="text"
+            value={orderData.courierStatus}
+            onChange={(e) =>
+              setOrderData({ ...orderData, courierStatus: e.target.value })
+            }
+          />
+        </div>
+        <div>
+          <label>Courier Tracking Number:</label>
+          <input
+            type="text"
+            value={orderData.courierTrackingNumber}
+            onChange={(e) =>
+              setOrderData({ ...orderData, courierTrackingNumber: e.target.value })
+            }
+          />
+        </div>
+      </div>

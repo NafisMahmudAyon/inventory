@@ -856,7 +856,6 @@ app.get("/api/products/:productId", async (req, res) => {
   WHERE p.id = ?
 `;
 
-
     db.query(productQuery, [productId], (error, productResult) => {
       console.log(productResult);
       const productName = productResult.productName;
@@ -866,13 +865,13 @@ app.get("/api/products/:productId", async (req, res) => {
       } else {
         const productData = {
           id: productId,
-          productName: productName,
-          productCode: productResult.productCode,
-          productCategory: productResult.productCategory,
-          supplier: productResult.supplierId,
-          buyingPrice: productResult.buyingPrice,
-          buyingDate: productResult.buyingDate,
-          sellingPrice: productResult.sellingPrice,
+          productName: productResult[0]?.productName,
+          productCode: productResult[0]?.productCode,
+          productCategory: productResult[0]?.productCategory,
+          supplier: productResult[0]?.supplierId,
+          buyingPrice: productResult[0]?.buyingPrice,
+          buyingDate: productResult[0]?.buyingDate,
+          sellingPrice: productResult[0]?.sellingPrice,
           colors: [],
           links: [],
         };
@@ -927,6 +926,214 @@ app.get("/api/products/:productId", async (req, res) => {
   } catch (error) {
     console.error("An error occurred:", error);
     res.status(500).json({ error: "An error occurred" });
+  }
+});
+
+// get method of a single product is done
+
+// put method of the update form
+app.put("/api/products/:productId", (req, res) => {
+  const productId = req.params.productId;
+  const {
+    productName,
+    productCode,
+    productCategory,
+    supplier,
+    buyingPrice,
+    buyingDate,
+    sellingPrice,
+    colors,
+    links,
+  } = req.body;
+
+  const updateProductQuery = `
+    UPDATE products
+    SET productName = ?, productCode = ?, productCategory = ?, supplier_id = ?, buyingPrice = ?, buyingDate = ?, sellingPrice = ?
+    WHERE id = ?
+  `;
+
+  db.query(
+    updateProductQuery,
+    [
+      productName,
+      productCode,
+      productCategory,
+      supplier,
+      buyingPrice,
+      buyingDate,
+      sellingPrice,
+      productId,
+    ],
+    (productErr, productResult) => {
+      if (productErr) {
+        console.error("Error updating product data:", productErr);
+        res
+          .status(500)
+          .json({ error: "An error occurred while updating product data" });
+        return;
+      }
+
+      const deleteProductVariationsQuery = `
+        DELETE FROM product_variations
+        WHERE product_id = ?
+      `;
+
+      db.query(deleteProductVariationsQuery, [productId], (deleteErr) => {
+        if (deleteErr) {
+          console.error("Error deleting product variations:", deleteErr);
+          res
+            .status(500)
+            .json({ error: "An error occurred while updating product data" });
+          return;
+        }
+
+        // Re-insert color, size, and quantity data for the updated product
+        colors.forEach((color) => {
+          const insertColorQuery = "INSERT INTO colors (color) VALUES (?)";
+          db.query(insertColorQuery, [color.color], (colorErr, colorResult) => {
+            if (colorErr) {
+              console.error("Error inserting color data:", colorErr);
+              return;
+            }
+
+            const colorId = colorResult.insertId;
+
+            color.sizes.forEach((size) => {
+              const insertSizeQuery = "INSERT INTO sizes (size) VALUES (?)";
+              db.query(insertSizeQuery, [size.size], (sizeErr, sizeResult) => {
+                if (sizeErr) {
+                  console.error("Error inserting size data:", sizeErr);
+                  return;
+                }
+
+                const sizeId = sizeResult.insertId;
+
+                const insertQuantityQuery =
+                  "INSERT INTO quantities (sizeId, quantity) VALUES (?, ?)";
+                db.query(
+                  insertQuantityQuery,
+                  [sizeId, size.quantity],
+                  (quantityErr, quantityResult) => {
+                    if (quantityErr) {
+                      console.error(
+                        "Error inserting quantity data:",
+                        quantityErr
+                      );
+                      return;
+                    }
+
+                    const quantityId = quantityResult.insertId;
+
+                    const insertProductVariationQuery = `
+                    INSERT INTO product_variations (product_id, color_id, size_id, quantity_id)
+                    VALUES (?, ?, ?, ?)
+                  `;
+                    db.query(
+                      insertProductVariationQuery,
+                      [productId, colorId, sizeId, quantityId],
+                      (variationErr) => {
+                        if (variationErr) {
+                          console.error(
+                            "Error inserting product variation data:",
+                            variationErr
+                          );
+                        }
+                      }
+                    );
+                  }
+                );
+              });
+            });
+          });
+        });
+
+        // Update link data for the updated product
+        const deleteLinksQuery = `
+          DELETE FROM links
+          WHERE product_id = ?
+        `;
+        db.query(deleteLinksQuery, [productId], (deleteLinksErr) => {
+          if (deleteLinksErr) {
+            console.error("Error deleting links:", deleteLinksErr);
+            res
+              .status(500)
+              .json({ error: "An error occurred while updating product data" });
+            return;
+          }
+
+          links.forEach((link) => {
+            const insertLinkQuery =
+              "INSERT INTO links (product_id, link) VALUES (?, ?)";
+            db.query(insertLinkQuery, [productId, link.link], (linkErr) => {
+              if (linkErr) {
+                console.error("Error inserting link data:", linkErr);
+              }
+            });
+          });
+
+          res
+            .status(200)
+            .json({ message: "Product data updated successfully" });
+        });
+      });
+    }
+  );
+});
+
+// put method finish
+
+// app.get("/api/sizes/:productId/:colorId", async (req, res) => {
+//   const productId = req.params.productId;
+//   const colorId = req.params.colorId;
+
+//   try {
+//     const sizesResult = await db.query(
+//       "SELECT s.id, s.size FROM sizes s INNER JOIN product_variations pv ON s.id = pv.size_id WHERE pv.product_id = ? AND pv.color_id = ?",
+//       [productId, colorId]
+//     );
+
+//     // Extract the rows from the result
+//     const rows = sizesResult[0];
+//     console.log(sizesResult);
+//     console.log(rows);
+//     // Ensure that rows is an array before using .map
+//     const sizes = Array.isArray(rows)
+//       ? rows.map((row) => ({
+//           id: row.id,
+//           size: row.size,
+//         }))
+//       : [];
+
+//     res.json({ sizes });
+//   } catch (error) {
+//     console.error("Error fetching sizes:", error);
+//     res.status(500).json({ error: "An error occurred while fetching sizes" });
+//   }
+// });
+
+app.get("/api/sizes/:colorId", async (req, res) => {
+  // const productId = req.params.productId;
+  const colorId = req.params.colorId;
+
+  try {
+    const sizesResult = await db.query(
+      "SELECT s.id, s.size FROM sizes s INNER JOIN product_variations pv ON s.id = pv.size_id WHERE  pv.color_id = ?",
+      [ colorId]
+    );
+    console.log(sizesResult);
+
+    // Ensure that sizesResult is an array before using .map
+    const sizes = Array.isArray(sizesResult)
+    ? sizesResult.map((row) => ({
+        id: row.id,
+        size: row.size,
+      }))
+    : [];
+
+    res.json({ sizes });
+  } catch (error) {
+    console.error("Error fetching sizes:", error);
+    res.status(500).json({ error: "An error occurred while fetching sizes" });
   }
 });
 

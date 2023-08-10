@@ -6,6 +6,8 @@ import ProductList from "./components/ProductList";
 import SizeForm from "./components/SizeForm";
 import SupplierForm from "./components/SupplierForm";
 import UpdateProductForm from "./components/UpdateProductForm";
+import OrderForm from "./components/OrderForm";
+import ProductSelector from "./components/ProductSelector";
 
 function App() {
   return (
@@ -24,6 +26,9 @@ function App() {
       <Route path="/" element={<ProductForm />}></Route>
         <Route path="/update-product/:productId" element={<UpdateProductForm />} ></Route>
         <Route path="/products" element={<ProductList />} ></Route>
+        <Route path="/suppliers" element={<SupplierForm />} ></Route>
+        <Route path="/order" element={<OrderForm />} ></Route>
+        <Route path="/qq" element={<ProductSelector />} ></Route>
         {/* Other routes */}
       </Routes>
     </BrowserRouter>
