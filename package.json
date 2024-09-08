@@ -1,7 +1,7 @@
 {
-  "name": "advanced-tooltip",
+  "name": "advanced-image",
   "version": "0.0.1",
-  "description": "React Advanced Tooltip Components",
+  "description": "React Advanced Image Components",
   "files": [
     "./lib/"
   ],
@@ -34,12 +34,13 @@
     "build:lib:cjs": "tsc -p tsconfig.lib.json",
     "build:lib:esm": "tsc -p tsconfig.lib.json --module esnext --declaration --outDir ./lib/esm",
     "lint": "eslint app --ext ts,tsx,js,jsx,cjs --report-unused-disable-directives --max-warnings 0",
+    "prettier": "npx prettier --write .",
     "lint:fix": "eslint app --ext js,jsx,ts,tsx,cjs --fix",
     "format": "prettier --write 'app/**/*.{js,jsx,ts,tsx,css,html}'"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/NafisMahmudAyon/advanced-tooltip.git"
+    "url": "git+https://github.com/NafisMahmudAyon/advanced-image.git"
   },
   "keywords": [
     "ui",
@@ -52,22 +53,28 @@
   "author": "Nafis Mahmud Ayon <nafismahmudayon@gmail.com>",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/NafisMahmudAyon/advanced-tooltip/issues"
+    "url": "https://github.com/NafisMahmudAyon/advanced-image/issues"
   },
   "dependencies": {
+    "@supabase/supabase-js": "^2.45.2",
+    "@types/dompurify": "^3.0.5",
+    "dompurify": "^3.1.6",
+    "next": "14.2.4",
     "react": "^18",
     "react-dom": "^18",
-    "next": "14.2.4"
+    "react-toastify": "^10.0.5",
+    "sharp": "^0.33.5"
   },
   "devDependencies": {
-    "typescript": "^5",
-    "@types/node": "^20",
-    "@types/react": "^18",
+    "@types/node": "^20","@types/react": "^18",
     "@types/react-dom": "^18",
     "css-minify": "^2.0.0",
-    "postcss": "^8",
-    "tailwindcss": "^3.4.1",
     "eslint": "^8",
-    "eslint-config-next": "14.2.4"
+    "eslint-config-next": "14.2.4",
+    "postcss": "^8",
+    "prettier": "^3.3.3",
+    "prettier-plugin-tailwindcss": "^0.6.6",
+    "tailwindcss": "^3.4.1",
+    "typescript": "^5"
   }
 }
