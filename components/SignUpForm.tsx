@@ -1,5 +1,6 @@
-'use client'
+'use client';
 import React, { useState } from 'react';
+import bcrypt from 'bcryptjs';
 import { supabase } from './createClient';
 
 // Define the type for form data
@@ -34,8 +35,6 @@ const SignupForm: React.FC = () => {
     address: '',
   });
 
-  console.log(formData)
-
   const [error, setError] = useState<ErrorState>({ email: '', user_name: '' });
   const [loading, setLoading] = useState<boolean>(false);
 
@@ -53,39 +52,14 @@ const SignupForm: React.FC = () => {
       .select(field)
       .eq(field, value);
 
-    return data && data.length > 0; // Returns true if the field exists
+    return data && data.length > 0;
   };
 
-  // const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-  //   e.preventDefault();
-  //   setError({ email: '', user_name: '' });
-  //   setLoading(true);
-
-  //   // Check if email or username exists
-  //   const emailExists = await checkExists('email', formData.email);
-  //   const userNameExists = await checkExists('user_name', formData.user_name);
-
-
-
-  //   if (emailExists) {
-  //     setError((prev) => ({ ...prev, email: 'Email already exists' }));
-  //   }
-  //   if (userNameExists) {
-  //     setError((prev) => ({ ...prev, user_name: 'Username already exists' }));
-  //   }
-
-  //   if (!emailExists && !userNameExists) {
-  //     // Submit the form if no errors
-  //     const { data, error } = await supabase.from('user').insert([formData]);
-  //     if (error) {
-  //       console.error('Error creating user:', error.message);
-  //     } else {
-  //       alert('User created successfully!');
-  //     }
-  //   }
-
-  //   setLoading(false);
-  // };
+  const encryptPassword = async (plainPassword: string) => {
+    const salt = await bcrypt.genSalt(12);
+    const hashedPassword = await bcrypt.hash(plainPassword, salt);
+    return hashedPassword;
+  };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -104,22 +78,21 @@ const SignupForm: React.FC = () => {
     }
 
     if (!emailExists && !userNameExists) {
-      // First create the user with email and password
-      const { data: authData, error: authError } = await supabase.auth.signUp({
-        email: formData.email,
-        password: formData.password,
-      });
+      try {
+        // Encrypt the password before storing
+        const encryptedPassword = await encryptPassword(formData.password);
 
-      if (authError) {
-        console.error('Error signing up:', authError.message);
-        setError((prev) => ({ ...prev, email: authError.message }));
-      } else if (authData?.user) {
-        const authID = authData.user.id;
-
-        // Now store the rest of the data in 'users' table with authID
+        // Save data to the database
         const { data, error } = await supabase.from('user').insert([{
-          ...formData,
-          authID, // Store the auth ID from the signed-up user
+          first_name: formData.first_name,
+          last_name: formData.last_name,
+          user_name: formData.user_name,
+          email: formData.email,
+          password: encryptedPassword,  // Save encrypted password
+          phone: formData.phone,
+          dob: formData.dob,
+          gender: formData.gender,
+          address: formData.address,
         }]);
 
         if (error) {
@@ -127,12 +100,13 @@ const SignupForm: React.FC = () => {
         } else {
           alert('User created successfully!');
         }
+      } catch (error) {
+        console.error('Error encrypting password:', error);
       }
     }
 
     setLoading(false);
   };
-
 
   return (
     <div className="max-w-md mx-auto mt-10 p-6 bg-white rounded-lg shadow-lg">
@@ -177,9 +151,8 @@ const SignupForm: React.FC = () => {
                 setError((prev) => ({ ...prev, user_name: 'Username already exists' }));
               }
             }}
-            className={`mt-1 block w-full px-3 py-2 border ${
-              error.user_name ? 'border-red-500' : 'border-gray-300'
-            } rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500`}
+            className={`mt-1 block w-full px-3 py-2 border ${error.user_name ? 'border-red-500' : 'border-gray-300'
+              } rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500`}
             required
           />
           {error.user_name && <p className="text-red-500 text-sm mt-1">{error.user_name}</p>}
@@ -198,9 +171,8 @@ const SignupForm: React.FC = () => {
                 setError((prev) => ({ ...prev, email: 'Email already exists' }));
               }
             }}
-            className={`mt-1 block w-full px-3 py-2 border ${
-              error.email ? 'border-red-500' : 'border-gray-300'
-            } rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500`}
+            className={`mt-1 block w-full px-3 py-2 border ${error.email ? 'border-red-500' : 'border-gray-300'
+              } rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500`}
             required
           />
           {error.email && <p className="text-red-500 text-sm mt-1">{error.email}</p>}
@@ -270,7 +242,6 @@ const SignupForm: React.FC = () => {
             className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
           />
         </div>
-
         <button
           type="submit"
           className="w-full bg-indigo-600 text-white py-2 px-4 rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"

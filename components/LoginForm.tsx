@@ -1,8 +1,8 @@
-'use client'
+'use client';
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from './createClient';
-
+import bcrypt from 'bcryptjs';
 
 const LoginForm: React.FC = () => {
   const [identifier, setIdentifier] = useState<string>(''); // Can be username or email
@@ -17,14 +17,12 @@ const LoginForm: React.FC = () => {
     setError(null);
 
     try {
-      // Check if the identifier is email or username
+      // Fetch user by email or username
       const { data: user, error: userError } = await supabase
         .from('user')
         .select('*')
         .or(`email.eq.${identifier},user_name.eq.${identifier}`)
         .single();
-
-        console.log(user)
 
       if (userError || !user) {
         setError('Invalid username or email');
@@ -32,24 +30,24 @@ const LoginForm: React.FC = () => {
         return;
       }
 
-      console.log(user.email)
-      console.log(password)
-      // Attempt login using Supabase's signInWithPassword
-      const { data: loginData, error: loginError } = await supabase.auth.signInWithPassword({
-        email: user.email, // Use the email associated with the user
-        password: password, // User-provided password
-      });
+      // Compare provided password with hashed password in the database
+      const passwordMatch = await bcrypt.compare(password, user.password);
 
-      console.log(loginData)
-
-      if (loginError) {
-        setError('Invalid credentials');
-        console.log(loginError)
+      if (!passwordMatch) {
+        setError('Invalid password');
         setLoading(false);
         return;
       }
 
-      // Redirect to dashboard or any desired route after successful login
+      // Simulate session management by storing user info in localStorage or cookies
+      const userData = {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+      };
+      localStorage.setItem('user', JSON.stringify(userData));
+
+      // Redirect to the dashboard
       router.push('/dashboard');
     } catch (err) {
       console.error('Login error:', err);
